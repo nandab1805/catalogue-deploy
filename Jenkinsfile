@@ -4,28 +4,23 @@ pipeline {
             label 'Agent'
         }
     }
-    // environment { 
-    //     packageVersion = ''
-    //     nexusURL = '172.31.91.191:8081'
-    // }
     options {
         timeout(time: 1, unit: 'HOURS') 
         disableConcurrentBuilds()
         ansiColor('xterm')
     }
-     parameters {
-        string(name: 'version', defaultValue: '', description: 'what is artifact version?')
-        string(name: 'environment', defaultValue: '', description: 'what is environment?')
-
+    parameters {
+        string(name: 'version', defaultValue: '', description: 'What is artifact version?')
+        string(name: 'environment', defaultValue: '', description: 'What is environment?')
+        string(name: 'action', defaultValue: '', description: 'Action: apply or destroy')
     }
     stages {
         stage('Print version') {
             steps {
-                sh"""
+                sh """
                     echo "version: ${params.version}"                
-                    echo "envinorment: ${params.environment}"
-
-                    """
+                    echo "environment: ${params.environment}"
+                """
             }
         }
         stage('Init') { 
@@ -33,7 +28,6 @@ pipeline {
                 sh """
                     cd terraform
                     terraform init --backend-config=${params.environment}/backend.tf -reconfigure
-
                 """
             }
         }
@@ -45,46 +39,39 @@ pipeline {
                 """
             }
         }
-        stage('apply') { 
+        stage('Apply/Destroy') { 
             steps {
-                sh """
-                    cd terraform
-                    terraform apply -var-file=${params.environment}/${params.environment}.tfvars -var="app_version=${params.version}" -auto-approve                 
-                """
-            }
-        }
-        stage('Destroy') {
-            when {
-                expression { 
-                    params.action == 'destroy'
+                script {
+                    if (params.action == 'apply') {
+                        sh """
+                            cd terraform
+                            terraform apply -var-file=${params.environment}/${params.environment}.tfvars -var="app_version=${params.version}" -auto-approve
+                        """
+                    } else if (params.action == 'destroy') {
+                        input {
+                            message "Are you sure you want to destroy the infrastructure?"
+                            ok "Yes, continue with destroy."
+                        }
+                        sh """
+                            cd terraform
+                            terraform destroy -auto-approve
+                        """
+                    }
                 }
-            }
-            input {
-                message "Should we continue?"
-                ok "Yes, we should."
-                // submitter "alice,bob"
-                // parameters {
-                //     string(name: 'PERSON', defaultValue: 'Mr Jenkins', description: 'Who should I say hello to?')
-                // }
-            }
-            steps {
-                sh """
-                    cd terraform
-                    terraform destroy -auto-approve
-                """
             }
         }
     }
     post { 
         always { 
-            echo 'I will always say Hello again and again!'
+            sh "rm -f terraform/destroy"  // Remove the destroy file
+            echo 'Pipeline finished.'
             deleteDir()
         }
         failure {
-            echo 'This runs when the pipeline fails, used generally to send some alerts.'
+            echo 'Pipeline failed. Please review.'
         }
         success {
-            echo 'I will say Hello when the pipeline is successful.'
+            echo 'Pipeline succeeded.'
         }
     }
 }
