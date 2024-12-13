@@ -17,7 +17,7 @@ pipeline {
     stages {
         stage('Print version') {
             steps {
-                sh"""
+                sh """
                     echo "version: ${params.version}"                
                     echo "environment: ${params.environment}"
                 """
@@ -50,7 +50,7 @@ pipeline {
             steps {
                 sh """
                     cd terraform
-                    terraform destroy -auto-approve
+                    terraform destroy -var-file=${params.environment}/${params.environment}.tfvars -var="app_version=${params.version}" -auto-approve
                 """
             }
         }
