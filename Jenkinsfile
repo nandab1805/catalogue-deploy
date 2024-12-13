@@ -13,8 +13,8 @@ pipeline {
         disableConcurrentBuilds()
     }
      parameters {
-        string(name: 'version', defaultValue: '1.0.0', description: 'what is artifact version?')
-        string(name: 'envinorment', defaultValue: 'dev', description: 'what is envinorment?')
+        string(name: 'version', defaultValue: '', description: 'what is artifact version?')
+        string(name: 'envinorment', defaultValue: '', description: 'what is envinorment?')
 
     }
     stages {
