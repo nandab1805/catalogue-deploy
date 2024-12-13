@@ -10,14 +10,14 @@ pipeline {
         ansiColor('xterm')
     }
     parameters {
-        string(name: 'version', defaultValue: '', description: 'What is artifact version?')
-        string(name: 'environment', defaultValue: '', description: 'What is environment?')
-        string(name: 'action', defaultValue: '', description: 'Action: apply or destroy')
+        string(name: 'version', defaultValue: '', description: 'What is the artifact version?')
+        string(name: 'environment', defaultValue: '', description: 'What is the environment?')
+        string(name: 'action', defaultValue: 'apply', description: 'Action to perform (apply/destroy)')
     }
     stages {
         stage('Print version') {
             steps {
-                sh """
+                sh"""
                     echo "version: ${params.version}"                
                     echo "environment: ${params.environment}"
                 """
@@ -39,31 +39,35 @@ pipeline {
                 """
             }
         }
-        stage('Apply/Destroy') { 
+        stage('Apply/Destroy') {
+            when {
+                expression { params.action == 'destroy' }
+            }
+            input {
+                message 'Should we continue?'
+                ok 'Yes, we should.'
+            }
             steps {
-                script {
-                    if (params.action == 'apply') {
-                        sh """
-                            cd terraform
-                            terraform apply -var-file=${params.environment}/${params.environment}.tfvars -var="app_version=${params.version}" -auto-approve
-                        """
-                    } else if (params.action == 'destroy') {
-                        input {
-                            message "Are you sure you want to destroy the infrastructure?"
-                            ok "Yes, continue with destroy."
-                        }
-                        sh """
-                            cd terraform
-                            terraform destroy -auto-approve
-                        """
-                    }
-                }
+                sh """
+                    cd terraform
+                    terraform destroy -auto-approve
+                """
+            }
+        }
+        stage('Apply') {
+            when {
+                expression { params.action == 'apply' }
+            }
+            steps {
+                sh """
+                    cd terraform
+                    terraform apply -var-file=${params.environment}/${params.environment}.tfvars -var="app_version=${params.version}" -auto-approve
+                """
             }
         }
     }
     post { 
         always { 
-            sh "rm -f terraform/destroy"  // Remove the destroy file
             echo 'Pipeline finished.'
             deleteDir()
         }
@@ -71,7 +75,7 @@ pipeline {
             echo 'Pipeline failed. Please review.'
         }
         success {
-            echo 'Pipeline succeeded.'
+            echo 'Pipeline completed successfully.'
         }
     }
 }
