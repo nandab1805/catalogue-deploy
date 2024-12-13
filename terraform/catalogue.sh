@@ -29,5 +29,5 @@ python3 -m pip install ansible botocore boto3
 ansible-pull -U https://github.com/nandab1805/ansible-roles-roboshop-tf.git \
   -e component=$component \
   -e env=$environment \
-  -e app_version=$app_version
+  -e app_version=$app_version \
   main-tf.yaml
