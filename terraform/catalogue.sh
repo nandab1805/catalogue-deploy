@@ -3,6 +3,7 @@
 # Arguments for the script
 component=$1
 environment=$2  # Don't use env here
+app_version=$3
 
 # Install EPEL and Remi repository for the latest Python
 yum install -y epel-release
@@ -28,4 +29,5 @@ python3 -m pip install ansible botocore boto3
 ansible-pull -U https://github.com/nandab1805/ansible-roles-roboshop-tf.git \
   -e component=$component \
   -e env=$environment \
+  -e app_version=$app_version
   main-tf.yaml
