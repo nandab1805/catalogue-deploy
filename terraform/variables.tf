@@ -24,6 +24,6 @@ variable "zone_name" {
   default = "nanda.cfd"
 }
 
-# variable app_version {
+variable app_version {
   
-# }
+}
