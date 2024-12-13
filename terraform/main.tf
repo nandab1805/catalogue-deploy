@@ -45,7 +45,7 @@ resource "null_resource" "catalogue" {
   }
 
   provisioner "file" {
-    source      = "catalogue.sh"
+    source      = "bootstrap.sh"
     destination = "/tmp/bootstrap.sh"
   }
 
