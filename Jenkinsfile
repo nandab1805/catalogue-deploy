@@ -23,7 +23,7 @@ pipeline {
             steps {
                 sh"""
                     echo "version: ${params.version}"                
-                    echo "envinorment: ${params.envinorment}"
+                    echo "envinorment: ${params.environment}"
 
                     """
             }
@@ -32,7 +32,7 @@ pipeline {
             steps {
                 sh """
                     cd terraform
-                    terraform init --backend-config=${params.environrment}/backend.tf -reconfigure
+                    terraform init --backend-config=${params.environment}/backend.tf -reconfigure
 
                 """
             }
