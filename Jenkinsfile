@@ -27,6 +27,15 @@ pipeline {
                     """
             }
         }
+        stage('Init') { 
+            steps {
+                sh """
+                    cd terraform
+                    terraform init --backend-config=${params.envinorment}/backend.tf -reconfigure
+
+                """
+            }
+        }
     }
     post { 
         always { 
