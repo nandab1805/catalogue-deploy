@@ -15,7 +15,7 @@ pipeline {
     }
      parameters {
         string(name: 'version', defaultValue: '', description: 'what is artifact version?')
-        string(name: 'envinorment', defaultValue: '', description: 'what is envinorment?')
+        string(name: 'environment', defaultValue: '', description: 'what is environment?')
 
     }
     stages {
